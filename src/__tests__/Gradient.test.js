@@ -96,24 +96,56 @@ describe(Gradient, () => {
 
       ultra.forEach((pixels) => {
         const gradient = `${pixels.map((pixel) => `linear-gradient(rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255}), rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255})) ${pixel.start}px 0px / ${pixel.end - pixel.start}px ${pixel.y}px`).join(',')};`;
+
+        const histograms = {
+          r: 0, g: 0, b: 0, a: 0,
+        };
+        histograms.r = (pixels[0].y * pixels.map((pixel) => pixel.r).reduce((a, b) => a + b, 0)) / pixels.length;
+        histograms.g = (pixels[0].y * pixels.map((pixel) => pixel.g).reduce((a, b) => a + b, 0)) / pixels.length;
+        histograms.b = (pixels[0].y * pixels.map((pixel) => pixel.b).reduce((a, b) => a + b, 0)) / pixels.length;
+        histograms.a = (pixels[0].y * pixels.map((pixel) => pixel.a).reduce((a, b) => a + b, 0)) / pixels.length;
+
         gradients.push({
           css: gradient,
           y: pixels[0].y,
+          histograms,
         });
       });
 
+      const diffH = (a, b) => (
+        Math.abs(a.r - b.r)
+          + Math.abs(a.g - b.g)
+          + Math.abs(a.b - b.b)
+          + Math.abs(a.a - b.a)
+      );
+
+      const duplicates = [];
       gradients.filter((item, index) => {
-        const foundIndex = gradients.findIndex((i) => item.css === i.css && i.y === item.y);
+        const foundIndex = gradients.findIndex((i) => item.css === i.css || diffH(i.histograms, item.histograms) < 10);
         if (index !== foundIndex) {
-          console.log('duplicate');
+          console.log([index, foundIndex]);
+          duplicates.push(item);
+          item.reference = foundIndex;
         }
         return index === foundIndex;
       });
 
-      const classes = gradients.map((gradient, index) => `.ultra${index} {width: ${width}px; height: ${gradient.y}px; background: ${gradient.css}; background-repeat: no-repeat}`);
+      console.log('number of duplicates', duplicates.length);
+
+      const classes = gradients.map((gradient, index) => {
+        if (gradient.reference) {
+          return null;
+        }
+        return `.ultra${index} {width: ${width}px; height: ${gradient.y}px; background: ${gradient.css}; background-repeat: no-repeat}`;
+      }).filter((gradient) => gradient);
       const style = `<style>${classes.join('\n')}</style>`;
-      const divs = gradients.map((gradient, index) => `<div class="ultra${index}"></div>`);
-      fs.writeFileSync('ultra.html', `${style}${divs.join('\n')}`);
+      const divs = gradients.map((gradient, index) => {
+        if (gradient.reference) {
+          return `<div class="ultra${gradient.reference}"></div>`;
+        }
+        return `<div class="ultra${index}"></div>`;
+      });
+      fs.writeFileSync('dups.html', `${style}${divs.join('\n')}`);
     });
   });
 });
