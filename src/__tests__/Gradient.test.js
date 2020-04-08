@@ -95,7 +95,7 @@ describe(Gradient, () => {
       });
 
       ultra.forEach((pixels) => {
-        const gradient = `${pixels.map((pixel) => `linear-gradient(rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255}), rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255})) ${pixel.start}px 0px / ${pixel.end - pixel.start}px ${pixel.y}px`).join(',')};`;
+        const gradient = `${pixels.map((pixel) => `linear-gradient(rgba(${pixel.r},${pixel.g},${pixel.b},${pixel.a / 255}),rgba(${pixel.r},${pixel.g},${pixel.b},${pixel.a / 255}))${pixel.start}px 0px / ${pixel.end - pixel.start}px ${pixel.y}px`).join(',')};`;
 
         const histograms = {
           r: 0, g: 0, b: 0, a: 0,
@@ -136,16 +136,16 @@ describe(Gradient, () => {
         if (gradient.reference) {
           return null;
         }
-        return `.ultra${index} {width: ${width}px; height: ${gradient.y}px; background: ${gradient.css}; background-repeat: no-repeat}`;
+        return `.r${index}{width:${width}px;height:${gradient.y}px;background:${gradient.css};background-repeat:no-repeat}`;
       }).filter((gradient) => gradient);
       const style = `<style>${classes.join('\n')}</style>`;
       const divs = gradients.map((gradient, index) => {
         if (gradient.reference) {
-          return `<div class="ultra${gradient.reference}"></div>`;
+          return `<div class="r${gradient.reference}"></div>`;
         }
-        return `<div class="ultra${index}"></div>`;
+        return `<div class="r${index}"></div>`;
       });
-      fs.writeFileSync('dups.html', `${style}${divs.join('\n')}`);
+      fs.writeFileSync('dups.html', `${style}${divs.join('')}`);
     });
   });
 });
