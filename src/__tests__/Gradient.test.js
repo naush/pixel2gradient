@@ -65,12 +65,13 @@ describe(Gradient, () => {
           });
         }
 
-        const gradient = `${compressed.map((pixel) => `linear-gradient(rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255}), rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255})) ${pixel.start}px 0px / ${pixel.end - pixel.start}px 1px`).join(',')};`;
+        const filtered = compressed.filter((pixel) => !(pixel.r === 255 && pixel.g === 255 && pixel.b === 255 && pixel.a === 255));
+        const gradient = `${filtered.map((pixel) => `linear-gradient(rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255}), rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255})) ${pixel.start}px 0px / ${pixel.end - pixel.start}px 1px`).join(',')};`;
 
         gradients.push(gradient);
       });
       const divs = gradients.map((gradient) => `<div style="width: ${width}px; height: 1px; background: ${gradient}; background-repeat: no-repeat"></div>`);
-      fs.writeFileSync('test2.html', divs.join('\n'));
+      fs.writeFileSync('filtered.html', divs.join('\n'));
     });
   });
 });
