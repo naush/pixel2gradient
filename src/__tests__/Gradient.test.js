@@ -102,8 +102,18 @@ describe(Gradient, () => {
         });
       });
 
-      const divs = gradients.map((gradient) => `<div style="width: ${width}px; height: ${gradient.y}px; background: ${gradient.css}; background-repeat: no-repeat"></div>`);
-      fs.writeFileSync('ultra.html', divs.join('\n'));
+      gradients.filter((item, index) => {
+        const foundIndex = gradients.findIndex((i) => item.css === i.css && i.y === item.y);
+        if (index !== foundIndex) {
+          console.log('duplicate');
+        }
+        return index === foundIndex;
+      });
+
+      const classes = gradients.map((gradient, index) => `.ultra${index} {width: ${width}px; height: ${gradient.y}px; background: ${gradient.css}; background-repeat: no-repeat}`);
+      const style = `<style>${classes.join('\n')}</style>`;
+      const divs = gradients.map((gradient, index) => `<div class="ultra${index}"></div>`);
+      fs.writeFileSync('ultra.html', `${style}${divs.join('\n')}`);
     });
   });
 });
