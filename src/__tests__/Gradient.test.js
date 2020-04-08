@@ -11,10 +11,10 @@ describe(Gradient, () => {
     });
 
     it('creates gradient for 1 pixel', async () => {
-      // const image = await Jimp.read('./src/__tests__/examples/9.jpg');
       const image = await Jimp.read('./src/__tests__/examples/10.png');
       const { width, height } = image.bitmap || image._exif.imageSize;
       const gradients = [];
+      const filtered = [];
       [...Array(height).keys()].forEach((y) => {
         const colors = [];
         [...Array(width).keys()].forEach((x) => {
@@ -29,6 +29,7 @@ describe(Gradient, () => {
           a: rgba.a,
           start: 0,
           end: 1,
+          y: 1,
         }));
 
         const compressed = [];
@@ -62,16 +63,47 @@ describe(Gradient, () => {
             a: prevPixel.a,
             start: 0,
             end: width,
+            y: 1,
           });
         }
 
-        const filtered = compressed.filter((pixel) => !(pixel.r === 255 && pixel.g === 255 && pixel.b === 255 && pixel.a === 255));
-        const gradient = `${filtered.map((pixel) => `linear-gradient(rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255}), rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255})) ${pixel.start}px 0px / ${pixel.end - pixel.start}px 1px`).join(',')};`;
-
-        gradients.push(gradient);
+        filtered.push(compressed.filter((pixel) => !(pixel.r === 255 && pixel.g === 255 && pixel.b === 255 && pixel.a === 255)));
       });
-      const divs = gradients.map((gradient) => `<div style="width: ${width}px; height: 1px; background: ${gradient}; background-repeat: no-repeat"></div>`);
-      fs.writeFileSync('filtered.html', divs.join('\n'));
+
+      const ultra = [];
+
+      filtered.forEach((pixels) => {
+        const prev = ultra[ultra.length - 1];
+
+        const compare = (a, b) => {
+          if (a.length === b.length) {
+            return a.every((pixel, index) => {
+              const bPixel = b[index];
+              return pixel.r === bPixel.r && pixel.g === bPixel.g && pixel.b === bPixel.b && pixel.a === bPixel.a;
+            });
+          }
+          return false;
+        };
+
+        if (prev && compare(prev, pixels)) {
+          prev.forEach((pixel) => {
+            pixel.y += 1;
+          });
+        } else {
+          ultra.push(pixels);
+        }
+      });
+
+      ultra.forEach((pixels) => {
+        const gradient = `${pixels.map((pixel) => `linear-gradient(rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255}), rgba(${pixel.r}, ${pixel.g}, ${pixel.b}, ${pixel.a / 255})) ${pixel.start}px 0px / ${pixel.end - pixel.start}px ${pixel.y}px`).join(',')};`;
+        gradients.push({
+          css: gradient,
+          y: pixels[0].y,
+        });
+      });
+
+      const divs = gradients.map((gradient) => `<div style="width: ${width}px; height: ${gradient.y}px; background: ${gradient.css}; background-repeat: no-repeat"></div>`);
+      fs.writeFileSync('ultra.html', divs.join('\n'));
     });
   });
 });
