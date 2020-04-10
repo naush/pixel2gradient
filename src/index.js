@@ -1,3 +1,3 @@
-import LinearGradient from './LinearGradient';
+import Transformer from './Transformer';
 
-export default LinearGradient;
+export default Transformer;

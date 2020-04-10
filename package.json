@@ -2,7 +2,8 @@
   "name": "pixel2gradient",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "test": "jest"
   },
@@ -14,10 +15,10 @@
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.2",
-    "jest": "^25.2.7",
-    "regenerator-runtime": "^0.13.5"
+    "jest": "^25.2.7"
   },
   "dependencies": {
-    "jimp": "^0.10.1"
+    "jimp": "^0.10.1",
+    "regenerator-runtime": "^0.13.5"
   }
 }
