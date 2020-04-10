@@ -136,9 +136,11 @@ describe(Gradient, () => {
         if (gradient.reference) {
           return null;
         }
-        return `.r${index}{width:${width}px;height:${gradient.y}px;background:${gradient.css};background-repeat:no-repeat}`;
+        const time = index / 10;
+        return `.r${index}{width:${width}px;height:${gradient.y}px;background:${gradient.css};background-repeat:no-repeat;animation: blinds ${time}s ease-in-out reverse forwards;}`;
       }).filter((gradient) => gradient);
-      const style = `<style>${classes.join('\n')}</style>`;
+      const animation = '@keyframes blinds { to { background-image: linear-gradient(90deg, #f90 100%, #444 0); } }';
+      const style = `<style>${classes.join('\n')}${animation}</style>`;
       const divs = gradients.map((gradient, index) => {
         if (gradient.reference) {
           return `<div class="r${gradient.reference}"></div>`;
