@@ -10,7 +10,7 @@ describe(Gradient, () => {
       file.resize(256, 256).write('256.jpg');
     });
 
-    it('creates gradient for 1 pixel', async () => {
+    xit('creates gradient for 1 pixel', async () => {
       const image = await Jimp.read('./src/__tests__/examples/10.png');
       const { width, height } = image.bitmap || image._exif.imageSize;
       const gradients = [];

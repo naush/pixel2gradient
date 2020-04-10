@@ -1,3 +1,3 @@
-import Gradient from './Gradient';
+import LinearGradient from './LinearGradient';
 
-export default Gradient;
+export default LinearGradient;
