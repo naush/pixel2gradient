@@ -254,6 +254,20 @@ describe(Transformer, () => {
           ],
           [
             {
+              r: 0,
+              g: 0,
+              b: 255,
+              a: 255,
+            },
+            {
+              r: 0,
+              g: 0,
+              b: 255,
+              a: 255,
+            },
+          ],
+          [
+            {
               r: 255,
               g: 0,
               b: 0,
@@ -283,8 +297,70 @@ describe(Transformer, () => {
   background: linear-gradient(rgba(255, 0, 0, 1), rgba(255, 0, 0, 1)) 0px 0px / 2px 1px;
   background-repeat: no-repeat;
 }
+.r1 {
+  width: 2px;
+  height: 1px;
+  background: linear-gradient(rgba(0, 0, 255, 1), rgba(0, 0, 255, 1)) 0px 0px / 2px 1px;
+  background-repeat: no-repeat;
+}
 </style>
 <div class="r0"></div>
+<div class="r1"></div>
+<div class="r0"></div>`);
+    });
+
+    it('joins adjacent lines with the same color sequence', async () => {
+      const parser = jest.fn();
+      const image = {
+        width: 2,
+        height: 2,
+        pixels: [
+          [
+            {
+              r: 255,
+              g: 0,
+              b: 0,
+              a: 255,
+            },
+            {
+              r: 255,
+              g: 0,
+              b: 0,
+              a: 255,
+            },
+          ],
+          [
+            {
+              r: 255,
+              g: 0,
+              b: 0,
+              a: 255,
+            },
+            {
+              r: 255,
+              g: 0,
+              b: 0,
+              a: 255,
+            },
+          ],
+        ],
+      };
+
+      parser.read = () => Promise.resolve(image);
+
+      const transformer = new Transformer(parser);
+
+      const html = await transformer.from('test.jpg');
+
+      expect(html).toEqual(`
+<style>
+.r0 {
+  width: 2px;
+  height: 2px;
+  background: linear-gradient(rgba(255, 0, 0, 1), rgba(255, 0, 0, 1)) 0px 0px / 2px 2px;
+  background-repeat: no-repeat;
+}
+</style>
 <div class="r0"></div>`);
     });
   });
