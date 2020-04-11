@@ -55,18 +55,22 @@ class Transformer {
     const tags = [];
 
     pixels
-      .forEach((row, y) => {
-        const compressed = Transformer.compress(row);
-        const gradients = compressed.map((pixel) => (
-          Transformer.gradient({ ...pixel })
-        ));
-        styles.push(`.r${y} {
+      .map((row) => Transformer.compress(row))
+      .map((row) => row.map((pixel) => Transformer.gradient({ ...pixel })))
+      .forEach((gradients, y, rows) => {
+        const index = rows.findIndex((row) => gradients.join() === row.join());
+
+        if (index !== y) {
+          tags.push(`<div class="r${index}"></div>`);
+        } else {
+          styles.push(`.r${y} {
   width: ${width}px;
   height: 1px;
   background: ${gradients.join(', ')};
   background-repeat: no-repeat;
 }`);
-        tags.push(`<div class="r${y}"></div>`);
+          tags.push(`<div class="r${y}"></div>`);
+        }
       });
 
     const html = `

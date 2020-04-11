@@ -47,7 +47,7 @@ describe(Transformer, () => {
 <div class="r0"></div>`);
     });
 
-    it('converts multiple pixels on a line', async () => {
+    it('converts two pixels on a line', async () => {
       const parser = jest.fn();
       const image = {
         width: 2,
@@ -135,7 +135,7 @@ describe(Transformer, () => {
 <div class="r0"></div>`);
     });
 
-    it('converts pixels on multiple lines', async () => {
+    it('converts one pixel per line', async () => {
       const parser = jest.fn();
       const image = {
         width: 1,
@@ -185,7 +185,7 @@ describe(Transformer, () => {
 <div class="r1"></div>`);
     });
 
-    it('combines pixels on the same line with the same color', async () => {
+    it('combines adjacent pixels on the same line with the same color', async () => {
       const parser = jest.fn();
       const image = {
         width: 2,
@@ -229,6 +229,62 @@ describe(Transformer, () => {
   background-repeat: no-repeat;
 }
 </style>
+<div class="r0"></div>`);
+    });
+
+    it('reuses the same style for lines with the same color sequence', async () => {
+      const parser = jest.fn();
+      const image = {
+        width: 2,
+        height: 2,
+        pixels: [
+          [
+            {
+              r: 255,
+              g: 0,
+              b: 0,
+              a: 255,
+            },
+            {
+              r: 255,
+              g: 0,
+              b: 0,
+              a: 255,
+            },
+          ],
+          [
+            {
+              r: 255,
+              g: 0,
+              b: 0,
+              a: 255,
+            },
+            {
+              r: 255,
+              g: 0,
+              b: 0,
+              a: 255,
+            },
+          ],
+        ],
+      };
+
+      parser.read = () => Promise.resolve(image);
+
+      const transformer = new Transformer(parser);
+
+      const html = await transformer.from('test.jpg');
+
+      expect(html).toEqual(`
+<style>
+.r0 {
+  width: 2px;
+  height: 1px;
+  background: linear-gradient(rgba(255, 0, 0, 1), rgba(255, 0, 0, 1)) 0px 0px / 2px 1px;
+  background-repeat: no-repeat;
+}
+</style>
+<div class="r0"></div>
 <div class="r0"></div>`);
     });
   });
