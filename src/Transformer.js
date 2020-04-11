@@ -7,9 +7,46 @@ class Transformer {
   }
 
   static gradient({
-    r, g, b, a, start,
+    r, g, b, a, start, end,
   }) {
-    return `linear-gradient(rgba(${r}, ${g}, ${b}, ${a / 255}), rgba(${r}, ${g}, ${b}, ${a / 255})) ${start}px 0px / 1px 1px`;
+    return [
+      `linear-gradient(rgba(${r}, ${g}, ${b}, ${a / 255}),`,
+      `rgba(${r}, ${g}, ${b}, ${a / 255}))`,
+      `${start}px 0px / ${end - start}px 1px`,
+    ].join(' ');
+  }
+
+  static compress(pixels) {
+    const sameColor = (a, b) => (
+      a.r === b.r
+        && a.g === b.g
+        && a.b === b.b
+        && a.a === b.a
+    );
+
+    const compressed = [];
+
+    pixels.forEach((pixel, index) => {
+      const prev = compressed[compressed.length - 1];
+      if (prev) {
+        if (sameColor(prev, pixel)) {
+          prev.end = (prev.end || 0) + 1;
+        } else {
+          pixel.start = prev.end || 0;
+          pixel.end = (prev.end || 0) + 1;
+          compressed.push(pixel);
+        }
+      } else {
+        pixel.start = pixel.start || 0;
+        pixel.end = pixel.end || 1;
+        compressed.push(pixel);
+      }
+    });
+    if (compressed.length === 1) {
+      const [prev] = compressed;
+      prev.end = pixels.length;
+    }
+    return compressed;
   }
 
   async from(path) {
@@ -19,11 +56,10 @@ class Transformer {
 
     pixels
       .forEach((row, y) => {
-        const gradients = [];
-        row.forEach((pixel, x) => {
-          const start = x;
-          gradients.push(Transformer.gradient({ ...pixel, start }));
-        });
+        const compressed = Transformer.compress(row);
+        const gradients = compressed.map((pixel) => (
+          Transformer.gradient({ ...pixel })
+        ));
         styles.push(`.r${y} {
   width: ${width}px;
   height: 1px;
