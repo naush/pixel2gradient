@@ -6,17 +6,22 @@ class Transformer {
     this.parser = parser;
   }
 
-  static gradients(row, y) {
-    return row.map((pixels) => Transformer.gradient({ ...pixels, y }));
+  static gradients(rows) {
+    return rows.map((row) => ({
+      ...row,
+      gradients: row.chunks.map(
+        (chunk) => Transformer.gradient({ ...chunk, height: row.height }),
+      ),
+    }));
   }
 
   static gradient({
-    r, g, b, a, start, end, y,
+    r, g, b, a, start, end, height,
   }) {
     return [
       `linear-gradient(rgba(${r}, ${g}, ${b}, ${a / 255}),`,
       `rgba(${r}, ${g}, ${b}, ${a / 255}))`,
-      `${start}px 0px / ${end - start}px ${y}px`,
+      `${start}px 0px / ${end - start}px ${height}px`,
     ].join(' ');
   }
 
@@ -27,82 +32,126 @@ class Transformer {
       && a.a === b.a;
   }
 
-  static compress(pixels) {
-    const compressed = [];
+  static compress(rows) {
+    return rows.map((row) => ({
+      ...row,
+      chunks: ((chunks) => {
+        const compressed = [];
 
-    pixels.forEach((pixel) => {
-      const prev = compressed[compressed.length - 1];
-      if (prev) {
-        if (Transformer.sameColor(prev, pixel)) {
-          prev.end = (prev.end || 0) + 1;
-        } else {
-          pixel.start = prev.end || 0;
-          pixel.end = (prev.end || 0) + 1;
-          compressed.push(pixel);
+        chunks.forEach((chunk) => {
+          const prev = compressed[compressed.length - 1];
+          if (prev) {
+            if (Transformer.sameColor(prev, chunk)) {
+              prev.end += 1;
+            } else {
+              chunk.start = prev.end;
+              chunk.end = prev.end + 1;
+              compressed.push(chunk);
+            }
+          } else {
+            compressed.push(chunk);
+          }
+        });
+        if (compressed.length === 1) {
+          const [prev] = compressed;
+          prev.end = chunks.length;
         }
-      } else {
-        pixel.start = pixel.start || 0;
-        pixel.end = pixel.end || 1;
-        compressed.push(pixel);
-      }
-    });
-    if (compressed.length === 1) {
-      const [prev] = compressed;
-      prev.end = pixels.length;
-    }
-    return compressed;
+        return compressed;
+      })(row.chunks),
+    }));
   }
 
-  async from(path) {
-    const { width, pixels } = await this.parser.read(path);
-    const styles = [];
-    const tags = [];
+  static compress2d(rows) {
+    const compressed = [];
 
-    const rows = pixels
-      .map((row) => ({
-        pixels: Transformer.compress(row),
-        y: 1,
-      }));
-
-    const uniques = [];
     rows.forEach((row) => {
-      const { y } = row;
-      const prev = uniques[uniques.length - 1];
-      if (prev && JSON.stringify(prev.pixels) === JSON.stringify(row.pixels)) {
-        prev.y += 1;
+      const prev = compressed[compressed.length - 1];
+      const { chunks } = row;
+
+      if (prev && JSON.stringify(prev.chunks) === JSON.stringify(chunks)) {
+        prev.height += 1;
       } else {
-        uniques.push({
-          pixels: row.pixels,
-          y,
+        compressed.push({
+          ...row,
+          chunks,
         });
       }
     });
 
-    uniques
-      .map((row) => ({ gradients: Transformer.gradients(row.pixels, row.y), y: row.y }))
-      .forEach(({ gradients, y }, index, _rows) => {
-        const i = _rows.findIndex((row) => gradients.join() === row.gradients.join());
+    return compressed;
+  }
 
-        if (i !== index) {
-          tags.push(`<div class="r${i}"></div>`);
-        } else {
-          styles.push(`.r${index} {
+  static uniq(rows) {
+    return rows.map((row, index) => {
+      const match = rows
+        .findIndex(
+          (_row) => JSON.stringify(_row.chunks) === JSON.stringify(row.chunks)
+            && _row.height === row.height,
+        );
+
+      if (match !== index) {
+        row.reference = match;
+      }
+
+      return row;
+    });
+  }
+
+  static initialize(rows) {
+    return rows.map((row) => ({
+      chunks: row.map((pixel) => ({
+        ...pixel,
+        start: 0,
+        end: 1,
+      })),
+      gradients: [],
+      height: 1,
+      reference: null,
+    }));
+  }
+
+  static html(width) {
+    return (rows) => {
+      const styles = [];
+      const tags = [];
+
+      rows
+        .forEach(({ gradients, height, reference }, index) => {
+          if (reference === null) {
+            styles.push(`.r${index} {
   width: ${width}px;
-  height: ${y}px;
+  height: ${height}px;
   background: ${gradients.join(', ')};
   background-repeat: no-repeat;
 }`);
-          tags.push(`<div class="r${index}"></div>`);
-        }
-      });
+            tags.push(`<div class="r${index}"></div>`);
+          } else {
+            tags.push(`<div class="r${reference}"></div>`);
+          }
+        });
 
-    const html = `
+      const html = `
 <style>
 ${styles.join('\n')}
 </style>
 ${tags.join('\n')}`;
 
-    return html;
+      return html;
+    };
+  }
+
+  async from(path) {
+    const { width, pixels } = await this.parser.read(path);
+    const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);
+
+    return pipe(
+      Transformer.initialize,
+      Transformer.compress,
+      Transformer.compress2d,
+      Transformer.uniq,
+      Transformer.gradients,
+      Transformer.html(width),
+    )(pixels);
   }
 }
 

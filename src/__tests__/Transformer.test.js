@@ -4,9 +4,9 @@ import 'regenerator-runtime/runtime';
 
 describe(Transformer, () => {
   describe('example', () => {
-    it('makes an example', async () => {
+    xit('makes an example', async () => {
       const transformer = new Transformer();
-      const result = await transformer.from('./examples/9.jpg');
+      const result = await transformer.from('./examples/10.png');
       fs.writeFileSync('example.html', result);
     });
   });
