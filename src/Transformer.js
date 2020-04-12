@@ -42,7 +42,7 @@ class Transformer {
     ].join(' ');
   }
 
-  static sameColor(a, b) {
+  static compareColors(a, b) {
     return a.r0 === b.r0
       && a.r1 === b.r1
       && a.g0 === b.g0
@@ -62,7 +62,7 @@ class Transformer {
         chunks.forEach((chunk) => {
           const prev = compressed[compressed.length - 1];
           if (prev) {
-            if (Transformer.sameColor(prev, chunk)) {
+            if (Transformer.compareColors(prev, chunk)) {
               prev.end += 1;
             } else {
               chunk.start = prev.end;
@@ -89,7 +89,7 @@ class Transformer {
       const prev = compressed[compressed.length - 1];
       const { chunks } = row;
 
-      if (prev && JSON.stringify(prev.chunks) === JSON.stringify(chunks)) {
+      if (prev && Transformer.compareRows(prev, row)) {
         prev.height += 1;
       } else {
         compressed.push({
@@ -102,15 +102,49 @@ class Transformer {
     return compressed;
   }
 
+  static compareRows(a, b, margin = 0) {
+    const buildHistograms = (chunks, height) => {
+      const histograms = {
+        r: { '0-127': 0, '128-255': 0 },
+        g: { '0-127': 0, '128-255': 0 },
+        b: { '0-127': 0, '128-255': 0 },
+      };
+
+      chunks.forEach((chunk) => {
+        const count = (chunk.end - chunk.start) * height;
+        histograms.r[chunk.r0 < 128 ? '0-127' : '128-255'] += count;
+        histograms.g[chunk.g0 < 128 ? '0-127' : '128-255'] += count;
+        histograms.b[chunk.b0 < 128 ? '0-127' : '128-255'] += count;
+      });
+
+      return histograms;
+    };
+
+    const compareHistograms = (left, right, margin) => (
+      Math.abs(left.r['0-127'] - right.r['0-127']) <= margin
+        && Math.abs(left.g['0-127'] - right.g['0-127']) <= margin
+        && Math.abs(left.b['0-127'] - right.b['0-127']) <= margin
+        && Math.abs(left.r['128-255'] - right.r['128-255']) <= margin
+        && Math.abs(left.g['128-255'] - right.g['128-255']) <= margin
+        && Math.abs(left.b['128-255'] - right.b['128-255']) <= margin
+    );
+
+    return compareHistograms(
+      buildHistograms(a.chunks, a.height),
+      buildHistograms(b.chunks, b.height),
+      margin,
+    );
+  }
+
   static uniq(rows) {
     return rows.map((row, index) => {
       const match = rows
         .findIndex(
-          (_row) => JSON.stringify(_row.chunks) === JSON.stringify(row.chunks)
+          (_row) => Transformer.compareRows(_row, row)
             && _row.height === row.height,
         );
 
-      if (match !== index) {
+      if (match >= 0 && match !== index) {
         row.reference = match;
       }
 

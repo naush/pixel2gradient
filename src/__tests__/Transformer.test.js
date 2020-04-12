@@ -6,11 +6,11 @@ describe(Transformer, () => {
   describe('example', () => {
     it('makes an example', async () => {
       const transformer = new Transformer();
-      const result = await transformer.from('./examples/nine.jpg');
-      fs.writeFileSync('nine.html', result);
+      const result = await transformer.from('./examples/charmander.png');
+      fs.writeFileSync('charmander.html', result);
     });
 
-    xit('rgb to hsl', () => {
+    it('rgb to hsl', () => {
       const a = { r: 10, g: 10, b: 10 };
       const b = { r: 0, g: 0, b: 0 };
 
@@ -275,13 +275,13 @@ describe(Transformer, () => {
             {
               r: 0,
               g: 0,
-              b: 255,
+              b: 100,
               a: 255,
             },
             {
               r: 0,
               g: 0,
-              b: 255,
+              b: 100,
               a: 255,
             },
           ],
@@ -319,7 +319,7 @@ describe(Transformer, () => {
 .g1 {
   width: 2px;
   height: 1px;
-  background: linear-gradient(rgba(0, 0, 255, 1), rgba(0, 0, 255, 1)) 0px 0px / 2px 1px;
+  background: linear-gradient(rgba(0, 0, 100, 1), rgba(0, 0, 100, 1)) 0px 0px / 2px 1px;
   background-repeat: no-repeat;
 }
 </style>
