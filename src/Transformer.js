@@ -30,7 +30,7 @@ class Transformer {
   }) {
     if (r0 !== r1 || g0 !== g1 || b0 !== b1) {
       return [
-        `linear-gradient(to right, rgba(${r0}, ${g0}, ${b0}, ${a0 / 255}),`,
+        `linear-gradient(90deg, rgba(${r0}, ${g0}, ${b0}, ${a0 / 255}),`,
         `rgba(${r1}, ${g1}, ${b1}, ${a1 / 255}))`,
         `${start}px 0px / ${end - start}px ${height}px`,
       ].join(' ');

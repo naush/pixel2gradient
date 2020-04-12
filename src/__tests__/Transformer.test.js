@@ -6,8 +6,8 @@ describe(Transformer, () => {
   describe('example', () => {
     it('makes an example', async () => {
       const transformer = new Transformer();
-      const result = await transformer.from('./examples/charmander.png');
-      fs.writeFileSync('example2.html', result);
+      const result = await transformer.from('./examples/nine.jpg');
+      fs.writeFileSync('nine.html', result);
     });
 
     xit('rgb to hsl', () => {
@@ -100,7 +100,7 @@ describe(Transformer, () => {
 .g0 {
   width: 2px;
   height: 1px;
-  background: linear-gradient(to right, rgba(255, 0, 0, 1), rgba(0, 255, 0, 1)) 0px 0px / 2px 1px;
+  background: linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 255, 0, 1)) 0px 0px / 2px 1px;
   background-repeat: no-repeat;
 }
 </style>
@@ -424,7 +424,7 @@ describe(Transformer, () => {
 .g0 {
   width: 3px;
   height: 1px;
-  background: linear-gradient(to right, rgba(255, 0, 0, 1), rgba(253, 0, 0, 1)) 0px 0px / 3px 1px;
+  background: linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(253, 0, 0, 1)) 0px 0px / 3px 1px;
   background-repeat: no-repeat;
 }
 </style>
@@ -471,7 +471,7 @@ describe(Transformer, () => {
 .g0 {
   width: 3px;
   height: 1px;
-  background: linear-gradient(to right, rgba(253, 0, 0, 1), rgba(255, 0, 0, 1)) 0px 0px / 3px 1px;
+  background: linear-gradient(90deg, rgba(253, 0, 0, 1), rgba(255, 0, 0, 1)) 0px 0px / 3px 1px;
   background-repeat: no-repeat;
 }
 </style>
@@ -518,7 +518,7 @@ describe(Transformer, () => {
 .g0 {
   width: 3px;
   height: 1px;
-  background: linear-gradient(to right, rgba(0, 255, 0, 1), rgba(0, 253, 0, 1)) 0px 0px / 3px 1px;
+  background: linear-gradient(90deg, rgba(0, 255, 0, 1), rgba(0, 253, 0, 1)) 0px 0px / 3px 1px;
   background-repeat: no-repeat;
 }
 </style>
@@ -577,7 +577,7 @@ describe(Transformer, () => {
 .g0 {
   width: 5px;
   height: 1px;
-  background: linear-gradient(to right, rgba(255, 0, 0, 1), rgba(253, 0, 0, 1)) 0px 0px / 3px 1px, linear-gradient(to right, rgba(99, 0, 0, 1), rgba(100, 0, 0, 1)) 3px 0px / 2px 1px;
+  background: linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(253, 0, 0, 1)) 0px 0px / 3px 1px, linear-gradient(90deg, rgba(99, 0, 0, 1), rgba(100, 0, 0, 1)) 3px 0px / 2px 1px;
   background-repeat: no-repeat;
 }
 </style>
@@ -683,7 +683,7 @@ describe(Transformer, () => {
 .g0 {
   width: 5px;
   height: 1px;
-  background: linear-gradient(to right, rgba(5, 5, 5, 1), rgba(1, 1, 1, 1)) 0px 0px / 5px 1px;
+  background: linear-gradient(90deg, rgba(5, 5, 5, 1), rgba(1, 1, 1, 1)) 0px 0px / 5px 1px;
   background-repeat: no-repeat;
 }
 </style>
