@@ -102,7 +102,11 @@ class Transformer {
     return compressed;
   }
 
-  static compareRows(a, b, margin = 0) {
+  static compareRows(a, b) {
+    return JSON.stringify(a.chunks) === JSON.stringify(b.chunks);
+  }
+
+  static compareHistograms(a, b, margin = 0) {
     const buildHistograms = (chunks, height) => {
       const histograms = {
         r: { '0-127': 0, '128-255': 0 },
